@@ -12,10 +12,17 @@ public:
 	Window& operator =(const Window&) = delete;
 	~Window();
 
+	void ShowAtCursor();
+
+	bool IsVisible() const;
+
 	bool processMessages();
 
 private:
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
+
+	bool m_isVisible = false;
+
 };
 

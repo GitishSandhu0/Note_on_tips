@@ -30,7 +30,7 @@ Window::Window()
 
 	RegisterClass(&wndClass);
 
-	DWORD style = WS_EX_PALETTEWINDOW | WS_EX_TOPMOST;
+	DWORD style = WS_EX_TOPMOST;
 
 	int width = 640;
 	int height = 100;
@@ -68,6 +68,21 @@ Window::~Window()
 	UnregisterClass(CLASS_NAME, m_hInstance);
 }
 
+void Window::ShowAtCursor()
+{
+	POINT cursorPos;
+	if (GetCursorPos(&cursorPos))
+	{
+		SetWindowPos(m_hWnd, HWND_TOPMOST, cursorPos.x, cursorPos.y, 0, 0, SWP_NOSIZE);
+		ShowWindow(m_hWnd, SW_SHOW);
+	}
+}
+
+bool Window::IsVisible() const
+{
+	return m_isVisible;
+}
+
 bool Window::processMessages()
 {
 	MSG msg = {};
@@ -75,6 +90,12 @@ bool Window::processMessages()
 	{
 		if (msg.message == WM_QUIT) {
 			return false;
+		}
+
+		if (msg.message == WM_KEYDOWN && msg.wParam == 'I' && GetAsyncKeyState(VK_CONTROL))
+		{
+			// Ctrl + I shortcut pressed, show the window at cursor position
+			ShowAtCursor();
 		}
 
 		TranslateMessage(&msg);

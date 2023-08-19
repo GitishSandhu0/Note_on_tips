@@ -1,4 +1,7 @@
 #include "Window.h"
+#include <iostream>
+
+HHOOK g_keyboardHook = nullptr;
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -14,6 +17,24 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
+
+LRESULT KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
+{
+	if (nCode == HC_ACTION)
+	{
+		KBDLLHOOKSTRUCT* pKey = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
+
+		if (wParam == WM_KEYDOWN && pKey->vkCode == 'I' && GetAsyncKeyState(VK_CONTROL))
+		{
+			std::cout << "Window Visibility Toggled\n";
+			Window* pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(GetForegroundWindow(), GWLP_USERDATA));
+			pWindow->ToggleWindowVisibility();
+		}
+	}
+
+	return CallNextHookEx(g_keyboardHook, nCode, wParam, lParam);
+}
+
 
 
 Window::Window()
@@ -78,9 +99,16 @@ void Window::ShowAtCursor()
 	}
 }
 
-bool Window::IsVisible() const
+void Window::ToggleWindowVisibility()
 {
-	return m_isVisible;
+	if (windowHidden) {
+		ShowAtCursor();
+		windowHidden = false;
+	}
+	else {
+		ShowWindow(m_hWnd, SW_HIDE);
+		windowHidden = true;
+	}
 }
 
 bool Window::processMessages()
@@ -92,11 +120,11 @@ bool Window::processMessages()
 			return false;
 		}
 
-		if (msg.message == WM_KEYDOWN && msg.wParam == 'I' && GetAsyncKeyState(VK_CONTROL))
-		{
-			// Ctrl + I shortcut pressed, show the window at cursor position
-			ShowAtCursor();
-		}
+	//	if (msg.message == WM_KEYDOWN && msg.wParam == 'I' && GetAsyncKeyState(VK_CONTROL))
+	//	{
+	//		// Ctrl + I shortcut pressed, show the window at cursor position
+	//		//ShowAtCursor();
+	//	}
 
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -104,4 +132,3 @@ bool Window::processMessages()
 
 	return true;
 }
-

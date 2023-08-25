@@ -1,7 +1,9 @@
 #include "Window.h"
 #include <iostream>
 
-HHOOK g_keyboardHook = nullptr;
+HHOOK Window::g_keyboardHook = nullptr;
+
+Window* Window::s_Instance = nullptr;
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -18,7 +20,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-LRESULT KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
+
+LRESULT Window::KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	if (nCode == HC_ACTION)
 	{
@@ -26,9 +29,10 @@ LRESULT KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == WM_KEYDOWN && pKey->vkCode == 'I' && GetAsyncKeyState(VK_CONTROL))
 		{
-			std::cout << "Window Visibility Toggled\n";
-			Window* pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(GetForegroundWindow(), GWLP_USERDATA));
-			pWindow->ToggleWindowVisibility();
+			if ((s_Instance && s_Instance->g_keyboardHook))
+			{
+				s_Instance->ToggleWindowVisibility();
+			}
 		}
 	}
 
@@ -79,7 +83,9 @@ Window::Window()
 		NULL
 	);
 
-	ShowWindow(m_hWnd, SW_SHOW);
+	s_Instance = this;
+
+	ShowWindow(m_hWnd, SW_HIDE);
 
 }
 
@@ -87,6 +93,7 @@ Window::~Window()
 {
 	const wchar_t* CLASS_NAME = L"New Window";
 	UnregisterClass(CLASS_NAME, m_hInstance);
+	s_Instance = nullptr;
 }
 
 void Window::ShowAtCursor()
@@ -119,12 +126,6 @@ bool Window::processMessages()
 		if (msg.message == WM_QUIT) {
 			return false;
 		}
-
-	//	if (msg.message == WM_KEYDOWN && msg.wParam == 'I' && GetAsyncKeyState(VK_CONTROL))
-	//	{
-	//		// Ctrl + I shortcut pressed, show the window at cursor position
-	//		//ShowAtCursor();
-	//	}
 
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);

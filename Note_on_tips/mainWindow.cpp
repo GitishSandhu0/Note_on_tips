@@ -6,9 +6,9 @@
 int main() {
 	std::cout << "Creating Window\n";
 
-	HHOOK g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardHookCallback, GetModuleHandle(NULL), 0);
-
 	Window* pWindow = new Window();
+	Window::g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, Window::KeyboardHookCallback, GetModuleHandle(NULL), 0);
+
 	bool running = true;
     while (running)
     {
@@ -16,6 +16,7 @@ int main() {
         Sleep(10);
     }
 
+	UnhookWindowsHookEx(Window::g_keyboardHook);
 	delete pWindow;
 
 	return 0;

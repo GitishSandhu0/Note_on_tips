@@ -3,7 +3,6 @@
 #include <Windows.h>
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam);
 
 class Window
 {
@@ -19,13 +18,13 @@ public:
 	bool processMessages();
 	bool windowHidden = true;
 
-	HHOOK g_keyboardHook = nullptr;
+	static LRESULT CALLBACK KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam);
+	static HHOOK g_keyboardHook;
 
 private:
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
-	
-	
+	static Window* s_Instance;
 
 };
 

@@ -58,10 +58,6 @@ The `Window` class manages the notes widget's behavior and appearance.
 - `windowHidden`: Indicates whether the notes window is currently hidden.
 - `g_keyboardHook`: Static member to store the keyboard hook.
 
-## Contributing
-
-Contributions to this project are welcome. If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
-
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed as properiatery.

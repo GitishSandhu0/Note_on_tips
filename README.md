@@ -31,7 +31,7 @@ This application requires a Windows operating system to run.
 
 - `Window.h` - Header file for the `Window` class that manages the notes window.
 - `Window.cpp` - Implementation of the `Window` class, including window creation, message processing, and keyboard hook.
-- `mainWindow.cpp` - Entry point of the application, where the `Window` class is instantiated and the main loop is run.
+- `mainWindow.cpp` - Entry point of the application, where the `Window` class is instantiated, and the main loop is run.
 
 ## Class Overview
 
@@ -46,6 +46,7 @@ The `Window` class manages the notes widget's behavior and appearance.
 - `ShowAtCursor()`: Positions the window at the current cursor position.
 - `ToggleWindowVisibility()`: Shows or hides the window based on its current visibility state.
 - `processMessages()`: Processes Windows messages and returns a boolean indicating whether the application should continue running.
+- `SaveNoteToCSV()`: Saves the entered note to a CSV file when Enter is pressed or the "Note Down" button is clicked.
 
 **Static Methods:**
 
@@ -60,4 +61,4 @@ The `Window` class manages the notes widget's behavior and appearance.
 
 ## License
 
-This project is licensed as properiatery.
+This project is licensed under a proprietary license.

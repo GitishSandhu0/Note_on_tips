@@ -3,6 +3,9 @@
 #include <iostream>
 #include <Windows.h>
 #include <commctrl.h>
+#include <fstream>
+#include <string>
+
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -22,10 +25,16 @@ public:
 	void ToggleWindowVisibility();
 
 	bool processMessages();
+
 	bool windowHidden = true;
 
 	static LRESULT CALLBACK KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam);
 	static HHOOK g_keyboardHook;
+
+	std::wstring m_savedText;
+	std::wstring GetSavedText() const;
+
+	void SaveNoteToCSV(const std::wstring& note) const;
 
 
 private:

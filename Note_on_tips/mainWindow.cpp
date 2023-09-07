@@ -10,10 +10,8 @@ int main() {
     Window::g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, Window::KeyboardHookCallback, GetModuleHandle(NULL), 0);
 
     if (pWindow) {
-        // Check if pWindow is not null before using it
         HWND buttonHWND = pWindow->GetButtonHWND();
         if (buttonHWND) {
-            // Now you can use buttonHWND
             HWND GetButtonHWND();
         }
 

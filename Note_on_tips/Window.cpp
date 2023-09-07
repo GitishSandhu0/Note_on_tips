@@ -39,7 +39,7 @@ LRESULT Window::KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 		{
 			if (s_Instance && s_Instance->g_keyboardHook)
 			{
-				HWND buttonHWND = s_Instance->GetButtonHWND(); // Access button HWND through the instance
+				HWND buttonHWND = s_Instance->GetButtonHWND();
 				s_Instance->ToggleWindowVisibility();
 			}
 		}
@@ -69,9 +69,25 @@ LRESULT Window::TextInputProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 				std::wstring textBuffer(textLength + 1, L'\0');
 				GetWindowText(s_Instance->m_hTextInput, &textBuffer[0], textLength + 1);
 				s_Instance->m_inputText = textBuffer;
+			}
+		}
+		break;
 
-				// Print the text to the console
-				wprintf(L"Input Text: %s\n", textBuffer.c_str());
+	case WM_KEYDOWN:
+		if (wParam == VK_RETURN)
+		{
+			int textLength = GetWindowTextLength(s_Instance->m_hTextInput);
+
+			if (textLength > 0)
+			{
+				std::wstring textBuffer(textLength + 1, L'\0');
+				GetWindowText(s_Instance->m_hTextInput, &textBuffer[0], textLength + 1);
+				s_Instance->m_savedText = textBuffer;
+
+				s_Instance->SaveNoteToCSV(textBuffer);
+
+				SetWindowText(s_Instance->m_hTextInput, L"");
+
 			}
 		}
 		break;
@@ -168,7 +184,6 @@ Window::Window()
 		CreateTextInputAndButton();
 	}
 
-	// Set the s_Instance pointer
 	s_Instance = this;
 
 	m_inputText = L"";
@@ -243,4 +258,24 @@ bool Window::processMessages()
 	}
 
 	return true;
+}
+
+std::wstring Window::GetSavedText() const
+{
+	return m_savedText;
+}
+
+void Window::SaveNoteToCSV(const std::wstring& note) const
+{
+	std::wofstream file("notes.csv", std::ios_base::app); // Open the CSV file in append mode
+	if (file.is_open())
+	{
+		file << note << L"\n"; // Write the note to the file followed by a newline
+		file.close(); // Close the file
+	}
+	else
+	{
+		// Handle error: Unable to open the CSV file
+		MessageBox(NULL, L"Error: Unable to save note to CSV file.", L"Error", MB_ICONERROR);
+	}
 }

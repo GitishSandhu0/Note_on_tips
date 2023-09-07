@@ -1,12 +1,14 @@
 #include "Window.h"
-#include <iostream>
-
-HHOOK Window::g_keyboardHook = nullptr;
 
 Window* Window::s_Instance = nullptr;
 
+HHOOK Window::g_keyboardHook = nullptr;
+
+
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	Window* pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
 	switch (uMsg)
 	{
 	case WM_CLOSE:
@@ -15,6 +17,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
+	case WM_COMMAND:
+		if (reinterpret_cast<HWND>(lParam) == pWindow->GetButtonHWND())
+		{
+			return 0;
+		}
+		break;
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -29,8 +37,9 @@ LRESULT Window::KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == WM_KEYDOWN && pKey->vkCode == 'I' && GetAsyncKeyState(VK_CONTROL))
 		{
-			if ((s_Instance && s_Instance->g_keyboardHook))
+			if (s_Instance && s_Instance->g_keyboardHook)
 			{
+				HWND buttonHWND = s_Instance->GetButtonHWND(); // Access button HWND through the instance
 				s_Instance->ToggleWindowVisibility();
 			}
 		}
@@ -40,10 +49,67 @@ LRESULT Window::KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 }
 
 
+HWND Window::GetTextInputHWND() const
+{
+	return m_hTextInput;
+}
+
+
+LRESULT Window::TextInputProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	switch (uMsg)
+	{
+	case WM_COMMAND:
+		if (s_Instance && reinterpret_cast<HWND>(lParam) == s_Instance->m_hButton)
+		{
+			int textLength = GetWindowTextLength(s_Instance->m_hTextInput);
+
+			if (textLength > 0)
+			{
+				std::wstring textBuffer(textLength + 1, L'\0');
+				GetWindowText(s_Instance->m_hTextInput, &textBuffer[0], textLength + 1);
+				s_Instance->m_inputText = textBuffer;
+
+				// Print the text to the console
+				wprintf(L"Input Text: %s\n", textBuffer.c_str());
+			}
+		}
+		break;
+	}
+
+	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+
+
+
+
+void Window::CreateTextInputAndButton()
+{
+	{
+		m_hTextInput = CreateWindowEx(
+			0,
+			L"EDIT",
+			L"",
+			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+			10, 10, 490, 25,
+			m_hWnd,
+			NULL,
+			m_hInstance,
+			NULL
+		);
+
+		SetWindowSubclass(m_hTextInput, TextInputProc, 0, 0);
+
+		m_pButtonHWND = &m_hButton;
+	}
+
+}
+
 
 Window::Window()
-	: m_hInstance(GetModuleHandle(nullptr))
 {
+	m_hInstance = GetModuleHandle(NULL);
+
 	const wchar_t* CLASS_NAME = L"New Window";
 
 	WNDCLASS wndClass = {};
@@ -83,17 +149,65 @@ Window::Window()
 		NULL
 	);
 
+	// Set the user data for the window to point to 'this'
+	SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
+
+	if (m_hWnd)
+	{
+		m_hButton = CreateWindow(
+			L"BUTTON",
+			L"Note Down",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+			510, 10, 100, 25,
+			m_hWnd,
+			NULL,
+			m_hInstance,
+			NULL
+		);
+
+		CreateTextInputAndButton();
+	}
+
+	// Set the s_Instance pointer
 	s_Instance = this;
 
-	ShowWindow(m_hWnd, SW_HIDE);
+	m_inputText = L"";
 
+	ShowWindow(m_hWnd, SW_HIDE);
 }
+
+
+
 
 Window::~Window()
 {
-	const wchar_t* CLASS_NAME = L"New Window";
-	UnregisterClass(CLASS_NAME, m_hInstance);
-	s_Instance = nullptr;
+	// Set the m_hWnd member variable to null
+	m_hWnd = nullptr;
+
+	// Destroy the keyboard hook
+	UnhookWindowsHookEx(g_keyboardHook);
+
+	// Unregister the window class
+	UnregisterClass(L"New Window", m_hInstance);
+}
+
+HWND Window::GetButtonHWND() const
+{
+	
+	if (m_hButton)
+	{
+		return m_hButton;
+	}
+	else
+	{
+		return nullptr;
+	}
+	
+}
+
+std::wstring Window::GetInputText() const
+{
+	return m_inputText;
 }
 
 void Window::ShowAtCursor()
@@ -118,15 +232,12 @@ void Window::ToggleWindowVisibility()
 	}
 }
 
+
 bool Window::processMessages()
 {
 	MSG msg = {};
-	while (PeekMessage(&msg, nullptr, 0u, 0u, PM_REMOVE))
+	while (GetMessage(&msg, nullptr, 0u, 0u))
 	{
-		if (msg.message == WM_QUIT) {
-			return false;
-		}
-
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}

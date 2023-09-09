@@ -17,12 +17,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
-	case WM_COMMAND:
-		if (reinterpret_cast<HWND>(lParam) == pWindow->GetButtonHWND())
-		{
-			return 0;
-		}
-		break;
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -35,11 +29,10 @@ LRESULT Window::KeyboardHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 	{
 		KBDLLHOOKSTRUCT* pKey = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
 
-		if (wParam == WM_KEYDOWN && pKey->vkCode == 'I' && GetAsyncKeyState(VK_CONTROL))
+		if (wParam == WM_KEYDOWN && pKey->vkCode == 'Q' && GetAsyncKeyState(VK_CONTROL))
 		{
 			if (s_Instance && s_Instance->g_keyboardHook)
 			{
-				HWND buttonHWND = s_Instance->GetButtonHWND();
 				s_Instance->ToggleWindowVisibility();
 			}
 		}
@@ -59,23 +52,11 @@ LRESULT Window::TextInputProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 {
 	switch (uMsg)
 	{
-	case WM_COMMAND:
-		if (s_Instance && reinterpret_cast<HWND>(lParam) == s_Instance->m_hButton)
-		{
-			int textLength = GetWindowTextLength(s_Instance->m_hTextInput);
-
-			if (textLength > 0)
-			{
-				std::wstring textBuffer(textLength + 1, L'\0');
-				GetWindowText(s_Instance->m_hTextInput, &textBuffer[0], textLength + 1);
-				s_Instance->m_inputText = textBuffer;
-			}
-		}
-		break;
 
 	case WM_KEYDOWN:
 		if (wParam == VK_RETURN)
 		{
+			std::cout << "Enter Btn Pressed\n";
 			int textLength = GetWindowTextLength(s_Instance->m_hTextInput);
 
 			if (textLength > 0)
@@ -107,7 +88,7 @@ void Window::CreateTextInputAndButton()
 			L"EDIT",
 			L"",
 			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-			10, 10, 490, 25,
+			2, 2, 490, 25,
 			m_hWnd,
 			NULL,
 			m_hInstance,
@@ -116,7 +97,6 @@ void Window::CreateTextInputAndButton()
 
 		SetWindowSubclass(m_hTextInput, TextInputProc, 0, 0);
 
-		m_pButtonHWND = &m_hButton;
 	}
 
 }
@@ -139,8 +119,8 @@ Window::Window()
 
 	DWORD style = WS_EX_TOPMOST;
 
-	int width = 640;
-	int height = 100;
+	int width = 510;
+	int height = 70;
 
 	RECT rect;
 	rect.left = 250;
@@ -165,24 +145,9 @@ Window::Window()
 		NULL
 	);
 
-	// Set the user data for the window to point to 'this'
 	SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
-	if (m_hWnd)
-	{
-		m_hButton = CreateWindow(
-			L"BUTTON",
-			L"Note Down",
-			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-			510, 10, 100, 25,
-			m_hWnd,
-			NULL,
-			m_hInstance,
-			NULL
-		);
-
-		CreateTextInputAndButton();
-	}
+	CreateTextInputAndButton();
 
 	s_Instance = this;
 
@@ -206,19 +171,6 @@ Window::~Window()
 	UnregisterClass(L"New Window", m_hInstance);
 }
 
-HWND Window::GetButtonHWND() const
-{
-	
-	if (m_hButton)
-	{
-		return m_hButton;
-	}
-	else
-	{
-		return nullptr;
-	}
-	
-}
 
 std::wstring Window::GetInputText() const
 {
@@ -237,6 +189,8 @@ void Window::ShowAtCursor()
 
 void Window::ToggleWindowVisibility()
 {
+	std::cout << "Window Visibility Toggled \n";
+
 	if (windowHidden) {
 		ShowAtCursor();
 		windowHidden = false;
@@ -272,6 +226,7 @@ void Window::SaveNoteToCSV(const std::wstring& note) const
 	{
 		file << note << L"\n"; // Write the note to the file followed by a newline
 		file.close(); // Close the file
+		std::cout << "Note Saved\n";
 	}
 	else
 	{

@@ -17,9 +17,7 @@ public:
 	Window& operator =(const Window&) = delete;
 	~Window();
 
-	HWND GetButtonHWND() const;
 	std::wstring GetInputText() const;
-	HWND m_hButton;
 
 	void ShowAtCursor();
 	void ToggleWindowVisibility();
@@ -36,15 +34,14 @@ public:
 
 	void SaveNoteToCSV(const std::wstring& note) const;
 
+	HICON m_hAppIcon = (HICON)LoadImage(NULL, L"icon_light.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+
 
 private:
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
 
 	HWND m_hTextInput;
-	
-	HWND* m_pButtonHWND;
-
 
 	HWND GetTextInputHWND() const;
 	std::wstring m_inputText;

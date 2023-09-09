@@ -50,7 +50,7 @@ The `Window` class manages the notes widget's behavior and appearance.
 
 **Static Methods:**
 
-- `KeyboardHookCallback()`: Handles keyboard hook events, specifically toggling the widget's visibility when `Ctrl + I` is pressed.
+- `KeyboardHookCallback()`: Handles keyboard hook events, specifically toggling the widget's visibility when `Ctrl + Q` is pressed.
 
 **Member Variables:**
 

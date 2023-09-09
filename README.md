@@ -1,11 +1,11 @@
 # Notes Taking Widget with Win32 API
 
-The **Notes Taking Widget** is a Windows application built using the Win32 API that provides a simple way to take notes. It creates a resizable and movable window where users can quickly jot down their thoughts. The widget can be toggled using a keyboard shortcut (`Ctrl + I`).
+The **Notes Taking Widget** is a Windows application built using the Win32 API that provides a simple way to take notes. It creates a resizable and movable window where users can quickly jot down their thoughts. The widget can be toggled using a keyboard shortcut (`Ctrl + Q`).
 
 ## Features
 
 - Create a resizable and movable notes window.
-- Toggle the visibility of the notes window using the keyboard shortcut `Ctrl + I`.
+- Toggle the visibility of the notes window using the keyboard shortcut `Ctrl + Q`.
 - The notes window remains on top of other windows (`WS_EX_TOPMOST` style).
 
 ## Getting Started
@@ -23,7 +23,7 @@ This application requires a Windows operating system to run.
 
 1. Build and run the application.
 2. The notes widget window will appear.
-3. To show or hide the notes window, press `Ctrl + I`.
+3. To show or hide the notes window, press `Ctrl + Q`.
 4. You can move the notes window by clicking and dragging its title bar.
 5. Resize the notes window by dragging its edges.
 
@@ -59,6 +59,5 @@ The `Window` class manages the notes widget's behavior and appearance.
 - `windowHidden`: Indicates whether the notes window is currently hidden.
 - `g_keyboardHook`: Static member to store the keyboard hook.
 
-## License
-
-This project is licensed under a proprietary license.
+**Contributions**
+This Repository is Open to all Contributions and Ideas.

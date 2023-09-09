@@ -7,7 +7,7 @@
 // Forward declaration of the tray icon message handler
 LRESULT CALLBACK TrayIconProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-bool g_bAppRunning = true; // Global flag to control the application's main loop
+bool g_bAppRunning = true;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {

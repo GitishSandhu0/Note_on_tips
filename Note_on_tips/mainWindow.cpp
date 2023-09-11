@@ -1,8 +1,13 @@
 #include <Windows.h>
 #include "Window.h"
+#include "Settings.h"
 
 // Define an ID for the tray icon menu item
 #define ID_TRAY_EXIT 1001
+#define ID_TRAY_SHOW_NOTES 1002
+#define ID_TRAY_SETTINGS 1003
+
+Settings settings;
 
 // Forward declaration of the tray icon message handler
 LRESULT CALLBACK TrayIconProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -76,12 +81,14 @@ LRESULT CALLBACK TrayIconProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
             // Display a context menu when right-clicking the tray icon
             POINT pt;
             GetCursorPos(&pt);
-            HMENU hPopupMenu = CreatePopupMenu();
-            AppendMenu(hPopupMenu, MF_STRING, ID_TRAY_EXIT, TEXT("Exit"));
+            HMENU hMenu = CreatePopupMenu();
+            AppendMenu(hMenu, MF_STRING, ID_TRAY_SHOW_NOTES, TEXT("Show saved Notes"));
+            AppendMenu(hMenu, MF_STRING, ID_TRAY_SETTINGS, TEXT("Settings"));
+            AppendMenu(hMenu, MF_STRING, ID_TRAY_EXIT, TEXT("Exit"));
             SetForegroundWindow(hWnd);
-            TrackPopupMenu(hPopupMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, NULL);
+            TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, NULL);
             PostMessage(hWnd, WM_NULL, 0, 0); // This is needed to close the menu after it's used
-            DestroyMenu(hPopupMenu);
+            DestroyMenu(hMenu);
             break;
         }
         }
@@ -90,6 +97,16 @@ LRESULT CALLBACK TrayIconProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
+        case ID_TRAY_SHOW_NOTES:
+            // Handle the "Show saved notes" option
+            // You can open a new window or display saved notes in some way
+            break;
+
+        case ID_TRAY_SETTINGS:
+            // Handle the "Settings" option
+            settings.ShowSettingsWindow();
+            break;
+
         case ID_TRAY_EXIT:
             // User selected "Exit" from the tray icon menu
             // Perform cleanup and exit your application
